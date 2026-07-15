@@ -5,11 +5,7 @@ backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#ffffff"
 textColor = "#111827"
 borderColor = "#e5e7eb"
-
-# Typography
-font = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap"
-headingFont = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap"
-codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap"
+headingFont = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&display=swap"
 
 baseRadius = "8px"
 buttonRadius = "8px"
