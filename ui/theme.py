@@ -119,6 +119,14 @@ img {
 footer    { visibility: hidden; }
 header    { background: transparent; }
 
+/* ==========================================================
+   Layout Spacing
+========================================================== */
+
+.block-container {
+    padding-top: 0rem !important;
+}
+
 </style>""",
         unsafe_allow_html=True,
     )
