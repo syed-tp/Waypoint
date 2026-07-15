@@ -30,6 +30,14 @@ COMPOSER_CSS = """
 .st-key-composer_card [data-testid="stButton"] button {
     width: fit-content !important;
 }
+
+/* Style for disabled generate button */
+.st-key-composer_card [data-testid="stButton"] button:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
+    opacity: 1 !important;
+}
 </style>
 """
 
