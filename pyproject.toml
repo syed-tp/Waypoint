@@ -17,6 +17,7 @@ dependencies = [
     "spacy>=3.8.13",
     "streamlit>=1.59.2",
     "torch",
+    "torchvision>=0.28.0",
     "webvtt-py>=0.5.1",
 ]
 

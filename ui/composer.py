@@ -57,6 +57,7 @@ def render_composer():
             if st.button(
                 ":material/auto_awesome: Generate chapters",
                 type="primary",
+                disabled=st.session_state.get("is_generating", False),
             ):
                 url = st.session_state.get("composer_url", "").strip()
                 parsed = urllib.parse.urlparse(url)
@@ -64,41 +65,60 @@ def render_composer():
                 if not url or not all([parsed.scheme, parsed.netloc]):
                     st.error("please provide the valid url")
                 else:
-                    from agent.models import Chapter, ChapterList
-                    
-                    dummy_data = ChapterList(chapters=[
-                        Chapter(start_time="00:00:00", title="Introduction"),
-                        Chapter(start_time="00:02:15", title="Setting up the Environment"),
-                        Chapter(start_time="00:08:42", title="Core Concepts & Architecture"),
-                        Chapter(start_time="00:15:30", title="Advanced Implementation"),
-                        Chapter(start_time="00:28:10", title="Summary and Q&A")
-                    ])
-                    
-                    st.success("Successfully generated chapters!")
-                    
-                    st.markdown("### Generated Chapters")
-                    tab1, tab2 = st.tabs(["List", "JSON"])
-                    
-                    with tab1:
-                        for chapter in dummy_data.chapters:
-                            st.markdown(f"- **`{chapter.start_time}`** : {chapter.title}")
-                            
-                    with tab2:
-                        import json
-                        data_dict = dummy_data.model_dump() if hasattr(dummy_data, "model_dump") else dummy_data.dict()
-                        st.code(json.dumps(data_dict, indent=2), language="json")
+                    st.session_state.is_generating = True
+                    st.session_state.current_url = url
+                    st.session_state.pop("generation_success", None)
+                    st.session_state.pop("generation_error", None)
+                    st.rerun()
 
-                    # Auto-scroll to the generated chapters
-                    import streamlit.components.v1 as components
-                    components.html(
-                        """
-                        <script>
-                        const tabs = window.parent.document.querySelector('[data-testid="stTabs"]');
-                        if (tabs) {
-                            tabs.scrollIntoView({behavior: 'smooth', block: 'center'});
-                        }
-                        </script>
-                        """,
-                        height=0,
-                    )
+            if st.session_state.get("is_generating", False):
+                from agent.agent import ChapterAgent
+                try:
+                    with st.spinner("Analyzing transcript and generating chapters..."):
+                        agent = ChapterAgent()
+                        url = st.session_state.current_url
+                        title = st.session_state.get("composer_title", "").strip()
+                        chapters_data = agent.run_pipeline(url, video_title=title if title else None)
+                        st.session_state.chapters_data = chapters_data
+                        st.session_state.generation_success = True
+                except Exception as e:
+                    st.session_state.generation_error = str(e)
+                finally:
+                    st.session_state.is_generating = False
+                    st.rerun()
 
+            if st.session_state.get("generation_success"):
+                chapters_data = st.session_state.chapters_data
+                st.success("Successfully generated chapters!")
+                
+                st.markdown("### Generated Chapters")
+                tab1, tab2 = st.tabs(["List", "JSON"])
+                
+                with tab1:
+                    for chapter in chapters_data.chapters:
+                        st.markdown(f"- **`{chapter.start_time}`** : {chapter.title}")
+                        
+                with tab2:
+                    import json
+                    data_dict = chapters_data.model_dump() if hasattr(chapters_data, "model_dump") else chapters_data.dict()
+                    st.code(json.dumps(data_dict, indent=2), language="json")
+
+                # Auto-scroll to the generated chapters
+                import streamlit.components.v1 as components
+                components.html(
+                    """
+                    <script>
+                    const tabs = window.parent.document.querySelector('[data-testid="stTabs"]');
+                    if (tabs) {
+                        tabs.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    }
+                    </script>
+                    """,
+                    height=0,
+                )
+            elif st.session_state.get("generation_error"):
+                error_str = st.session_state.generation_error
+                if "429" in error_str or "ResourceExhausted" in error_str:
+                    st.error("Hold your horses! Rate limit exceeded. Please wait a moment and try again.")
+                else:
+                    st.error(f"Oops! Something went wrong while generating chapters:\n\n`{error_str}`")
