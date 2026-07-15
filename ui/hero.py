@@ -1,5 +1,3 @@
-# ui/hero.py
-
 import streamlit as st
 
 HERO_CSS = """
@@ -15,7 +13,7 @@ HERO_CSS = """
 }
 
 .hero {
-    margin: 2rem auto;
+    margin: 0 auto 2rem;
     text-align: center;
 }
 

@@ -1,5 +1,3 @@
-# ui/theme.py
-
 import streamlit as st
 
 
