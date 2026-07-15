@@ -1,19 +1,12 @@
 # Waypoint — AI Video Chapter Generator
 
+[![Live App](https://img.shields.io/badge/Live_App-trywaypoint.streamlit.app-blue)](https://trywaypoint.streamlit.app/)
+
 ## Overview
 
 Waypoint is a simple AI-powered tool that automatically generates chapters for long-form videos.
 
 Provide a video title and a publicly accessible VTT (WebVTT) transcript URL, and Waypoint analyzes the transcript to identify topic transitions and produce well-structured chapters.
-
-Each generated chapter includes:
-
-- Section name
-- Chapter title
-- Start timestamp
-- End timestamp
-- Duration
-- Thumbnail frame timestamp
 
 The generated chapters make long videos easier to navigate, allowing viewers to jump directly to the topics they are interested in.
 
@@ -29,25 +22,22 @@ Waypoint automates this process in minutes, producing consistent, meaningful cha
 
 ## How It Works
 
-The user provides:
+Waypoint utilizes a multi-step **transcript optimization chain** to analyze the video text before generation. Because raw video transcripts are often too large and unstructured for an LLM to process effectively, this pipeline extracts the most critical semantic transitions first.
 
-- Video title
-- Public VTT transcript URL
-- (Optional) Preferred number of chapters
+### Architecture Flow
 
-Waypoint analyzes the transcript, detects topic changes, and generates a structured list of chapters.
+```mermaid
+graph TD
+    B["Transcript Segments"]
+    B --> C["Filtering: spaCy NLP"]
+    C --> D["Semantic Analysis: SentenceTransformers"]
+    D --> E["Context Building: Extract Representative Segments"]
+    E --> F{"LLM Generation"}
+    F --> G["Structured Chapters"]
+```
 
----
-
-## Output
-
-For every chapter, Waypoint returns:
-
-- Section
-- Title
-- Start time
-- End time
-- Duration
-- Frame timestamp (for thumbnail extraction)
-
-The output can be used directly by video players to display a navigable chapter list.
+1. **Cleanup**: Parses the raw WebVTT and strips unnecessary timestamps and formatting, keeping only the raw text and cue timings.
+2. **Filtering**: Uses NLP (`en_core_web_sm` via spaCy) to remove low-information cues and filler content that don't contribute to topic shifts.
+3. **Semantic Analysis**: Employs SentenceTransformers (`all-MiniLM-L6-v2`) to embed the transcript segments, detecting semantic boundaries to group similar ideas together.
+4. **Context Building**: Extracts the most representative segments for each semantic cluster, vastly reducing the transcript size while perfectly preserving key topic transitions.
+5. **LLM Generation**: This optimized, dense context is injected into a prompt alongside the video title and sent to the LLM. The LLM's job is to assign clean, descriptive titles to the pre-identified transition points.
