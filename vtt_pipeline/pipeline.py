@@ -12,12 +12,7 @@ from .context import build_representative_context
 class VttPipeline:
     def __init__(self, embedding_model="all-MiniLM-L6-v2", spacy_model="en_core_web_sm"):
         self.embedder = SentenceTransformer(embedding_model)
-        try:
-            self.nlp = spacy.load(spacy_model)
-        except OSError:
-            from spacy.cli import download
-            download(spacy_model)
-            self.nlp = spacy.load(spacy_model)
+        self.nlp = spacy.load(spacy_model)
 
     def process(self, source: str, is_url: bool = False) -> list[dict]:
         vtt_file = source
