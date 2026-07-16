@@ -41,3 +41,10 @@ graph TD
 3. **Semantic Analysis**: Employs SentenceTransformers (`all-MiniLM-L6-v2`) to embed the transcript segments, detecting semantic boundaries to group similar ideas together.
 4. **Context Building**: Extracts the most representative segments for each semantic cluster, vastly reducing the transcript size while perfectly preserving key topic transitions.
 5. **LLM Generation**: This optimized, dense context is injected into a prompt alongside the video title and sent to the LLM. The LLM's job is to assign clean, descriptive titles to the pre-identified transition points.
+
+
+### Example
+
+Below is an example of the generated chapters and timestamps produced by the Waypoint pipeline after processing a raw VTT file:
+
+![Example output](static/image.png)
